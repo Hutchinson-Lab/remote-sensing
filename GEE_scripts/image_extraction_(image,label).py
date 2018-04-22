@@ -1,12 +1,12 @@
 """
-Downloads a triple (satellite image, labeled image, majority label) in the
- form of (image, image, scalar) to Google Drive given a list of locations
+Downloads a tuple (satellite image, majority NLCD label) in the
+ form of (image, scalar) to Google Drive given a list of locations
 
  *must first have the Google Earth Engine Python API installed and
   authenticated*
 ====================================================================
 **Author**: Laurel Hopkins
-**Date**:   Oct 2017
+**Date**:   April 2017
 
 IMPORTANT:
 If the list exceeds 1000 locations, manually split the list into smaller batches of 1000
@@ -18,7 +18,7 @@ If the list exceeds 1000 locations, manually split the list into smaller batches
            locations 2000 - 2999 (locations_2000.csv)
 
 run: image_extraction.py [locations.csv] [locations_offset]
- ex. image_extraction.py [oregon_0c.csv] [0]
+ ex. image_extraction.py oregon_0c.csv 0 c
 
 """
 
@@ -31,13 +31,12 @@ import sys
 ee.Initialize()
 
 
-def collect_images(filename, width, scale, offset, imgsize, nlcd_filename, naip_filename, nlcd_folder, naip_folder, export_outputs):
-
-	# NLCD image
+def collect_images(filename, width, scale, offset, letter, imgsize, naip_filename, naip_folder, export_outputs):
+	# NLCD
 	landCover = ee.Image('USGS/NLCD/NLCD2011') \
 		.select('landcover')
 
-	# NAIP image
+	# NAIP
 	NAIP = ee.ImageCollection('USDA/NAIP/DOQQ')\
 		.filterDate('2011-01-01', '2011-12-01')\
 		.reduce(ee.Reducer.median())
@@ -45,8 +44,7 @@ def collect_images(filename, width, scale, offset, imgsize, nlcd_filename, naip_
 	NAIP_vis = NAIP.visualize()  # takes first three bands (R,G,B)
 
 	ft_points = []
-	letter = filename[-5]
-	with open('oregon_points/' + filename, 'rb') as csvfile:
+	with open(filename, 'rb') as csvfile:
 		record = csv.reader(csvfile)
 		for row in record:
 			point_index = row[0]
@@ -70,6 +68,8 @@ def collect_images(filename, width, scale, offset, imgsize, nlcd_filename, naip_
 
 		for set in ft_points:
 			index, point = set[0], set[1]
+			#print(index)
+			#print(point)
 			_long, _lat = point[0], point[1]
 			image_index = count + offset
 
@@ -92,10 +92,10 @@ def collect_images(filename, width, scale, offset, imgsize, nlcd_filename, naip_
 				# NAIP
 				task = ee.batch.Export.image.toDrive(
 					image=NAIP_vis,
-					description=naip_filename + str(image_index),
+					description=naip_filename + index + "_" + str(image_index) + letter,
 					dimensions=imgsize,
 					region=f1,
-					folder=naip_folder + letter  # 'GEE/NAIP_image'
+					folder=naip_folder + letter
 				)
 
 				task.start()
@@ -110,32 +110,6 @@ def collect_images(filename, width, scale, offset, imgsize, nlcd_filename, naip_
 					print 'NAIP image ', str(image_index), ' of', str(total_points), ' done'
 				else:
 					print 'NAIP image ', str(image_index), ' of', str(total_points), ' failed:'
-					print task.status()
-					delete_writer.writerow([index, point])
-					count += 1
-					continue
-
-				# NLCD
-				task = ee.batch.Export.image.toDrive(
-					image=landCover,
-					description=nlcd_filename + str(image_index),
-					dimensions=imgsize,
-					region=f1,
-					folder=nlcd_folder + letter  # 'GEE/NLCD_image'
-				)
-
-				task.start()
-				state = task.status()['state']
-				while state in ['READY', 'RUNNING']:
-					if export_outputs:
-						print state + '...'
-					# print task.status()
-					state = task.status()['state']
-
-				if task.status()['state'] == 'COMPLETED':
-					print 'NLCD image ', str(image_index), ' of', str(total_points), ' done'
-				else:
-					print 'NLCD image ', str(image_index), ' of', str(total_points), ' failed:'
 					print task.status()
 					delete_writer.writerow([index, point])
 					count += 1
@@ -157,8 +131,10 @@ if __name__ == '__main__':
 	# https://fusiontables.google.com/data?docid=1n-XWd5KgdVGGKRaw-XVkerYL3xM2BZwXY1bQEhqF#rows:id=1
 
 	'EXPORT IMAGES'
+	# CHECK FOR offset, and letter --> 0 and 0 if empty
 	_input_file = sys.argv[1]
 	_offset = int(sys.argv[2])
+	_letter = sys.argv[3]
 
 	'MAP PARAMETERS'
 	# _zoom = 16  # range 0 - 20 (whole world - building) -- NOT USED
@@ -170,12 +146,10 @@ if __name__ == '__main__':
 	_imgformat = "png32"  # doesn't matter for Export.toDrive - saved as .tiff
 
 	'EXPORT PARAMETERS'
-	_nlcd_filename = "oregon_nlcd_"
-	_naip_filename = "oregon_naip_"
-	_nlcd_folder = 'GEE/NLCD_'
-	_naip_folder = 'GEE/NAIP_'
+	_naip_filename = ""
+	_naip_folder = 'GEE/eBird_OR_2011_'
 
 	# enable export outputs [READY/RUNNING]
 	_export_outputs = False
 
-	collect_images(_input_file, _width, _scale, _offset, _imgsize, _nlcd_filename, _naip_filename, _nlcd_folder, _naip_folder, _export_outputs)
+	collect_images(_input_file, _width, _scale, _offset, _letter, _imgsize, _naip_filename, _naip_folder, _export_outputs)
