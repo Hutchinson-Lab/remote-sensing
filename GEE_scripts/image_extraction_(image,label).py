@@ -105,6 +105,7 @@ def collect_images(filename, width, scale, offset, letter, imgsize, naip_filenam
 						print state + '...'
 					# print task.status()
 					state = task.status()['state']
+					time.sleep(30)
 
 				if task.status()['state'] == 'COMPLETED':
 					print 'NAIP image ', str(image_index), ' of', str(total_points), ' done'
@@ -142,12 +143,12 @@ if __name__ == '__main__':
 
 	'IMAGE PARAMETERS'
 	_imgsize = [224, 224]
-	_width = 400  # width (and height) of output image in meters
+	_width = 2000  # width (and height) of output image in meters
 	_imgformat = "png32"  # doesn't matter for Export.toDrive - saved as .tiff
 
 	'EXPORT PARAMETERS'
 	_naip_filename = ""
-	_naip_folder = 'GEE/eBird_OR_2011_'
+	_naip_folder = 'eBird_OR_2011_'
 
 	# enable export outputs [READY/RUNNING]
 	_export_outputs = False
