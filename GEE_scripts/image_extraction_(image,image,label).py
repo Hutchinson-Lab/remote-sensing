@@ -46,7 +46,7 @@ def collect_images(filename, width, scale, offset, imgsize, nlcd_filename, naip_
 
 	ft_points = []
 	letter = filename[-5]
-	with open('oregon_points/' + filename, 'rb') as csvfile:
+	with open('points/' + filename, 'rb') as csvfile:
 		record = csv.reader(csvfile)
 		for row in record:
 			point_index = row[0]
@@ -154,8 +154,7 @@ def collect_images(filename, width, scale, offset, imgsize, nlcd_filename, naip_
 
 
 if __name__ == '__main__':
-	# https://fusiontables.google.com/data?docid=1n-XWd5KgdVGGKRaw-XVkerYL3xM2BZwXY1bQEhqF#rows:id=1
-
+	
 	'EXPORT IMAGES'
 	_input_file = sys.argv[1]
 	_offset = int(sys.argv[2])
@@ -167,7 +166,7 @@ if __name__ == '__main__':
 	'IMAGE PARAMETERS'
 	_imgsize = [224, 224]
 	_width = 400  # width (and height) of output image in meters
-	_imgformat = "png32"  # doesn't matter for Export.toDrive - saved as .tiff
+	# _imgformat = "png32"  # doesn't matter for Export.toDrive - saved as .tiff
 
 	'EXPORT PARAMETERS'
 	_nlcd_filename = "oregon_nlcd_"
