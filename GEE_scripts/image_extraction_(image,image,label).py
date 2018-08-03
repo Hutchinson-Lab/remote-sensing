@@ -105,6 +105,7 @@ def collect_images(filename, width, scale, offset, imgsize, nlcd_filename, naip_
 						print state + '...'
 					# print task.status()
 					state = task.status()['state']
+					time.sleep(30)
 
 				if task.status()['state'] == 'COMPLETED':
 					print 'NAIP image ', str(image_index), ' of', str(total_points), ' done'
@@ -131,6 +132,7 @@ def collect_images(filename, width, scale, offset, imgsize, nlcd_filename, naip_
 						print state + '...'
 					# print task.status()
 					state = task.status()['state']
+					time.sleep(30)
 
 				if task.status()['state'] == 'COMPLETED':
 					print 'NLCD image ', str(image_index), ' of', str(total_points), ' done'
