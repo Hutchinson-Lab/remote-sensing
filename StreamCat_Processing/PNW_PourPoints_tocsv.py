@@ -21,7 +21,7 @@ catchments = gpd.GeoDataFrame.from_file("H:/NHDPlusV21/NHDPlusPN/NHDPlus17/NHDPl
 
 for index,row in flowlines.iterrows(): 
     if row[flowlines._geometry_column_name].geom_type != 'LineString': 
-        print row['COMID']
+        print(row['COMID'])
         
 flowlines.loc[flowlines['COMID'] == 947050377, 'geometry']
 flowlines = flowlines[flowlines.COMID != 947050377].copy(deep = True)
@@ -43,7 +43,12 @@ result["Lat"] = result.centroid.map(lambda p: p.y)
 result = result[['COMID','Lat','Lon']]
 # Random sample
 result = result.sample(2000)
+
+result_coms = catchments[catchments['FEATUREID'].isin(result['COMID'])]
 result.to_csv('H:/WorkingData/PNW_PourPoints.csv', index=False)
+result_coms.to_file('H:/WorkingData/PNW_PourPoints_Cats.shp')
+
+
 
 
 
