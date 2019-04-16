@@ -20,7 +20,6 @@ If the list exceeds 1000 locations, manually split the list into smaller batches
 
 run: image_extraction.py [locations.csv] [locations_offset]
  ex. image_extraction.py [oregon_0c.csv] [0]
-
 """
 
 
@@ -49,6 +48,7 @@ featlist = fc.getInfo()["features"]
 #  mask2 = image.mask().reduce(ee.Reducer.min());
 #  return image.updateMask(cloud.not()).updateMask(mask2)
 
+# functions used from here: https://gis.stackexchange.com/questions/274048/apply-cloud-mask-to-landsat-imagery-in-google-earth-engine-python-api
 def getQABits(image, start, end, mascara):
     # Compute the bits we need to extract.
     pattern = 0
