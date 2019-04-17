@@ -36,7 +36,7 @@ result = gpd.GeoDataFrame(result)
 result = result.rename(columns={1: 'COMID', 0: 'geometry'}).set_geometry('geometry')
 result.to_file("H:/WorkingData/Junk/result_test.shp") # just to check results
 
-# restrict to cathcment endpoints
+# restrict to catchment endpoints
 result = result[result['COMID'].isin(catchments['FEATUREID'])].dropna()
 result["Lon"] = result.centroid.map(lambda p: p.x)
 result["Lat"] = result.centroid.map(lambda p: p.y)
@@ -48,7 +48,18 @@ result_coms = catchments[catchments['FEATUREID'].isin(result['COMID'])]
 result.to_csv('H:/WorkingData/PNW_PourPoints.csv', index=False)
 result_coms.to_file('H:/WorkingData/PNW_PourPoints_Cats.shp')
 
+# generate centroids and then boxes around centroids, then export and use this for extracting GEE Landsat
+pnw_cats = gpd.GeoDataFrame.from_file('C:/Users/mweber/GitProjects/remote-sensing/PNW_PourPoints_Cats.shp')
+pnw_centroids = pnw_cats.copy()
+pnw_centroids['geometry'] = pnw_centroids['geometry'].centroid
 
+# apply planar CRS
+pnw_centroids.crs
+pnw_centroids = pnw_centroids.to_crs(epsg=5070)
 
-
-
+# create 'box' buffer
+pnw_buffer = pnw_centroids.copy()
+help(gpd.GeoSeries.buffer) # GeoPandas doesn't fully parameterize shapely options
+import shapely
+pnw_buffer['geometry'] = pnw_buffer['geometry'].buffer(1400, cap_style=3)
+pnw_buffer.to_file("C:/Users/mweber/GitProjects/remote-sensing/PNW_Cat_Centroid_Sq_Bufs.shp")

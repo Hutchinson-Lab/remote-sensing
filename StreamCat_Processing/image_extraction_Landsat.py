@@ -31,12 +31,18 @@ import sys
 
 ee.Initialize()
 
-fc = ee.FeatureCollection("users/mweber36/NN_Testing/PNW_PourPoints_Cats")
+fc = ee.FeatureCollection("users/mweber36/NN_Testing/PNW_Cat_Centroid_Sq_Bufs")
 
-#img = YOUR_IMAGE
+# function to get catchment centroids - doing this in GeoPandas but left in
+#def getCentroid(feature):
+#    keepProperties = ['AreaSqKM','FEATUREID','GRIDCODE','SOURCEFC']
+#    centroid = feature.geometry().centroid()
+#    return ee.Feature(centroid).copyProperties(feature, keepProperties)
+#
+#centroids = fc.map(getCentroid)
 
 featlist = fc.getInfo()["features"]
-
+#featlist = centroids.getInfo()["features"]
 #def cloudMaskL457:
 #  qa = image.select('pixel_qa')
 #  // If the cloud bit (5) is set and the cloud confidence (7) is high
@@ -88,7 +94,7 @@ task = batch.Export.image.toDrive(
 task.start()            
 
 
-def collect_images(_input_file, _imgsize, _export_outputs):
+def collect_images(_input_file, _scale, _export_outputs):
     LandSat = ee.ImageCollection('LANDSAT/LE07/C01/T1_SR')\
         .filterDate('2011-01-01', '2011-12-31')\
         .map(maskQuality)\
@@ -101,8 +107,9 @@ def collect_images(_input_file, _imgsize, _export_outputs):
             task = ee.batch.Export.image.toDrive(
 				image=LandSat,
 				description= desc,
-				dimensions=_imgsize,
-				region=feat['geometry']['coordinates'][0],
+#				dimensions=_imgsize,
+                scale = _scale,
+				region=feat['geometry']['coordinates'],               
 				folder='GEE'  # 'GEE/NAIP_image'
 			)
             task.start()
@@ -126,13 +133,15 @@ if __name__ == '__main__':
 	# https://fusiontables.google.com/data?docid=1n-XWd5KgdVGGKRaw-XVkerYL3xM2BZwXY1bQEhqF#rows:id=1
 
 #	'EXPORT IMAGES'
-	_input_file = ee.FeatureCollection("users/mweber36/NN_Testing/PNW_PourPoints_Cats")
+	_input_file = ee.FeatureCollection("users/mweber36/NN_Testing/PNW_Cat_Centroid_Sq_Bufs")
 
 #	'IMAGE PARAMETERS'
-	_imgsize = [500, 500]
+#	_imgsize = [500, 500]
+    _scale = 30
 
 
 	# enable export outputs [READY/RUNNING]
-	_export_outputs = False
+	_export_outputs = True
 
-	collect_images(_input_file, _imgsize, _export_outputs)
+#	collect_images(_input_file, _imgsize, _export_outputs)
+    collect_images(_input_file, _scale, _export_outputs)
