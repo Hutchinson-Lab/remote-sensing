@@ -62,4 +62,5 @@ pnw_buffer = pnw_centroids.copy()
 help(gpd.GeoSeries.buffer) # GeoPandas doesn't fully parameterize shapely options
 import shapely
 pnw_buffer['geometry'] = pnw_buffer['geometry'].buffer(1400, cap_style=3)
+pnw_buffer = pnw_buffer.to_crs(epsg=4326)
 pnw_buffer.to_file("C:/Users/mweber/GitProjects/remote-sensing/PNW_Cat_Centroid_Sq_Bufs.shp")
