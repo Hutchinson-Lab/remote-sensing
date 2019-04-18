@@ -51,7 +51,17 @@ result_coms.to_file('H:/WorkingData/PNW_PourPoints_Cats.shp')
 # generate centroids and then boxes around centroids, then export and use this for extracting GEE Landsat
 pnw_cats = gpd.GeoDataFrame.from_file('C:/Users/mweber/GitProjects/remote-sensing/PNW_PourPoints_Cats.shp')
 pnw_centroids = pnw_cats.copy()
+def getXY(pt):
+    return (pt.x, pt.y)
 pnw_centroids['geometry'] = pnw_centroids['geometry'].centroid
+x,y = [list(t) for t in zip(*map(getXY,pnw_centroids['geometry']))]
+pnw_centroids['Lat'] = x
+pnw_centroids['Lon'] = y
+pnw_centroids['ID']= 'LS7_' + pnw_centroids['FEATUREID'].astype(str)
+pnw_centroids = pnw_centroids[['ID','Lat','Lon','geometry']]
+pnw_centroids.to_file("C:/Users/mweber/GitProjects/remote-sensing/PNW_Centroids.shp")
+pnw_centroids = pd.DataFrame(pnw_centroids.drop(columns='geometry'))
+pnw_centroids.to_csv("C:/Users/mweber/GitProjects/remote-sensing/PNW_Centroids.csv", index=False)
 
 # apply planar CRS
 pnw_centroids.crs
