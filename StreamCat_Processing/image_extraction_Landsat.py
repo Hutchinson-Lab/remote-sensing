@@ -94,7 +94,7 @@ task = batch.Export.image.toDrive(
 task.start()            
 
 
-def collect_images(_input_file, _scale, _export_outputs):
+def collect_images(_input_file, _imgsize, _export_outputs):
     LandSat = ee.ImageCollection('LANDSAT/LE07/C01/T1_SR')\
         .filterDate('2011-01-01', '2011-12-31')\
         .map(maskQuality)\
@@ -107,8 +107,8 @@ def collect_images(_input_file, _scale, _export_outputs):
             task = ee.batch.Export.image.toDrive(
 				image=LandSat,
 				description= desc,
-#				dimensions=_imgsize,
-                scale = _scale,
+				dimensions=_imgsize,
+#                scale = _scale,
 				region=feat['geometry']['coordinates'],               
 				folder='GEE'  # 'GEE/NAIP_image'
 			)
@@ -136,8 +136,8 @@ if __name__ == '__main__':
 	_input_file = ee.FeatureCollection("users/mweber36/NN_Testing/PNW_Cat_Centroid_Sq_Bufs")
 
 #	'IMAGE PARAMETERS'
-#	_imgsize = [500, 500]
-    _scale = 30
+	_imgsize = [224, 224]
+#    _scale = 30
 
 
 	# enable export outputs [READY/RUNNING]
